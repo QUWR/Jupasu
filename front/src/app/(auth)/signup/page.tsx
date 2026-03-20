@@ -27,7 +27,7 @@ export default function SignupPage() {
   } = useSignup();
 
   return (
-    <div className="bg-background flex min-h-screen flex-col px-6 py-10">
+    <div className="flex min-h-screen flex-col px-6 py-10">
       {/* Header Area */}
       <header className="relative mx-auto mb-8 flex w-full max-w-md flex-col items-center">
         <button

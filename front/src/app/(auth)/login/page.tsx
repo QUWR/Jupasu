@@ -10,7 +10,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const error = typeof params.error === 'string' ? params.error : undefined;
 
   return (
-    <div className="bg-background flex min-h-screen flex-col px-6 py-12">
+    <div className="flex min-h-screen flex-col px-6 py-12">
       <div className="mt-12 mb-10 flex flex-col items-center justify-center space-y-6">
         <div className="relative h-32 w-32">
           <Image src="/logo.png" alt="JUPASU Logo" fill className="object-contain" priority />
