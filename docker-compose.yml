@@ -55,13 +55,12 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
-      SOURCE_IMAGE_DIR: /app/source_images
+      SOURCE_IMAGE_DIR: /app/data/image
       TARGET_IMAGE_DIR: /app/uploads/images/wines
       DATA_FILE_PATH: /app/data/vivino_ultra_results_kr_food.json
     volumes:
-      - /home/ubuntu/data/image:/app/source_images:ro
-      - /home/ubuntu/data:/app/data:ro
-      - ./uploads:/app/uploads
+     - /home/ubuntu/data:/app/data:ro
+     - ./uploads:/app/uploads
     ports:
       - "8080:8080"
     depends_on:

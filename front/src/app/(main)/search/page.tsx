@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-// ⭐️ [수정] ChevronLeft 아이콘 추가 (제공해주신 코드 스타일 반영)
 import { Search, SlidersHorizontal, X, Star, ChevronLeft } from 'lucide-react';
 import Chip from '@/components/ui/chip/Chip';
 import Link from 'next/link';
@@ -9,7 +8,8 @@ import { ROUTE_PATH } from '@/constants/route-path';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/axios';
 
-const WINE_TYPES = ['RED', 'WHITE', 'ROSE', 'DESSERT', 'FORTIFIED'];
+// ⭐️ [수정] 'SPARKLING' 추가 완료!
+const WINE_TYPES = ['RED', 'WHITE', 'SPARKLING', 'ROSE', 'DESSERT', 'FORTIFIED'];
 
 const SORT_OPTIONS = [
   { key: 'RECOMMEND', label: '추천순' }, 
@@ -150,7 +150,7 @@ export default function SearchPage() {
           </button>
         </div>
 
-        {/* ⭐️ [수정] 제공해주신 코드 스타일을 100% 반영한 오른쪽 정렬 버튼 */}
+        {/* 오른쪽 정렬 버튼 */}
         <div className="flex items-center justify-end gap-2 pt-2">
           <div className="relative" ref={sortRef}>
             <button

@@ -38,14 +38,13 @@ public class WineDataInitService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Value("${SOURCE_IMAGE_DIR:C:/image}")
+    @Value("${SOURCE_IMAGE_DIR:/app/data/image}")
     private String sourceImageDir;
 
-    @Value("${TARGET_IMAGE_DIR:uploads/images/wines}")
+    @Value("${TARGET_IMAGE_DIR:/app/uploads/images/wines}")
     private String targetImageDir;
 
-    // ⭐️ 파일명 변경: vivino_ultra_results_kr_food.json
-    @Value("${DATA_FILE_PATH:C:/ssafy/jupasu/data/vivino_ultra_results_kr_food.json}")
+    @Value("${DATA_FILE_PATH:/app/data/vivino_ultra_results_kr_food.json}")
     private String dataFilePath;
 
     @Transactional
