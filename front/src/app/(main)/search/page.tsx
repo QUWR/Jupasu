@@ -8,7 +8,6 @@ import { ROUTE_PATH } from '@/constants/route-path';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/axios';
 
-// ⭐️ [수정] 'SPARKLING' 추가 완료!
 const WINE_TYPES = ['RED', 'WHITE', 'SPARKLING', 'ROSE', 'DESSERT', 'FORTIFIED'];
 
 const SORT_OPTIONS = [
@@ -38,21 +37,17 @@ export default function SearchPage() {
   const [wines, setWines] = useState<WineSearchResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 페이징을 위한 상태 관리
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
-  // 정렬 관련 상태
   const [sortOption, setSortOption] = useState('RECOMMEND');
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
 
-  // Filter States
   const [selectedType, setSelectedType] = useState<string>('');
   const [selectedRating, setSelectedRating] = useState(0);
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
 
-  // 드롭다운 외부 클릭 시 닫기 로직
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
@@ -122,8 +117,10 @@ export default function SearchPage() {
   };
 
   return (
+    // ⭐️ [수정] 전체 배경색 원복: bg-[#FAFAFA] -> bg-background
     <div className="min-h-screen bg-background flex flex-col pb-24 relative">
       {/* Header */}
+      {/* ⭐️ [수정] 헤더 패딩 및 스타일 원복: px-5, pt-[calc...], bg-[#FAFAFA] -> px-6, pt-10, bg-transparent */}
       <header className="px-6 pt-10 pb-4 space-y-4">
         <div>
           <h1 className="text-2xl font-black text-text-main italic tracking-tight uppercase">EXPLORE</h1>
@@ -131,12 +128,14 @@ export default function SearchPage() {
         </div>
 
         {/* 검색창과 필터 버튼 */}
+        {/* ⭐️ [수정] 간격 원복: gap-2.5 -> gap-2 */}
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-main/30" size={20} />
             <input
-              className="w-full bg-white border-2 border-primary-100 rounded-full py-3 pl-12 pr-4 text-sm font-bold focus:outline-none focus:border-primary-500 transition-colors shadow-inner-sm"
-              placeholder="와인 이름, 종류, 키워드... (입력 후 Enter)"
+              // ⭐️ [수정] 인풋 스타일 원복
+              className="w-full bg-white border-2 border-primary-100 rounded-full py-3 pl-12 pr-4 text-sm font-bold focus:outline-none focus:border-primary-500 transition-colors shadow-inner-sm placeholder:text-text-main/20"
+              placeholder="와인 이름, 종류 검색..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearchKeyDown}
@@ -144,6 +143,7 @@ export default function SearchPage() {
           </div>
           <button 
             onClick={() => setIsFilterOpen(true)}
+            // ⭐️ [수정] 버튼 스타일 원복
             className="w-[52px] h-[52px] shrink-0 bg-white border-2 border-primary-100 rounded-full flex items-center justify-center text-text-main/40 shadow-sm cursor-pointer active:scale-95 transition-transform"
           >
             <SlidersHorizontal size={20} />
@@ -151,6 +151,7 @@ export default function SearchPage() {
         </div>
 
         {/* 오른쪽 정렬 버튼 */}
+        {/* ⭐️ [수정] 정렬 버튼 원복 */}
         <div className="flex items-center justify-end gap-2 pt-2">
           <div className="relative" ref={sortRef}>
             <button
@@ -193,7 +194,9 @@ export default function SearchPage() {
       </header>
 
       {/* Wine Grid */}
+      {/* ⭐️ [수정] 메인 패딩 원복: px-5 -> px-4 */}
       <main className="flex-1 px-4 overflow-y-auto no-scrollbar pt-1">
+        {/* ⭐️ [수정] 간격 원복: gap-3.5 -> gap-3 */}
         <div className="grid grid-cols-2 gap-3 items-start content-start">
           {wines.length > 0 ? (
             wines.map((wine) => (
@@ -201,13 +204,16 @@ export default function SearchPage() {
                 key={wine.id} 
                 href={ROUTE_PATH.WINE_DETAIL(wine.id)}
                 prefetch={false}
+                // ⭐️ [수정] 카드 스타일 원복
                 className="bg-white rounded-[20px] border border-primary-100 shadow-sm flex flex-col overflow-hidden active:scale-[0.98] transition-transform"
               >
                 {/* 이미지 영역 */}
-                <div className="w-full aspect-[1/1] bg-white relative overflow-hidden flex items-center justify-center">
+                {/* ⭐️ [핵심 수정 유지] 사진 부분만 잘 보이도록 p-4 여백 추가 유지 및 비율 조정 (aspect-square) */}
+                <div className="w-full aspect-square bg-white relative overflow-hidden flex items-center justify-center p-4">
                    <img
                      src={wine.imageUrl === '/images/default_wine.png' ? DEFAULT_WINE_IMAGE_URL : (wine.imageUrl || DEFAULT_WINE_IMAGE_URL)}
                      alt={wine.nameKr || wine.nameEn}
+                     // ⭐️ [핵심 수정 유지] object-contain 속성 유지
                      className="max-w-full max-h-full object-contain"
                      onError={(e) => {
                        e.currentTarget.src = DEFAULT_WINE_IMAGE_URL;
@@ -215,8 +221,11 @@ export default function SearchPage() {
                      }}
                    />
                 </div>
+                
+                {/* 텍스트 영역 */}
+                {/* ⭐️ [수정] 텍스트 영역 패딩 및 폰트 사이즈 원복 */}
                 <div className="p-3 space-y-1.5">
-                   <h3 className="font-black text-sm text-text-main leading-tight truncate">
+                   <h3 className="font-black text-sm text-text-main leading-tight line-clamp-2">
                      {wine.nameKr || wine.nameEn}
                    </h3>
                    <p className="text-[10px] text-text-main/40 font-bold truncate">
@@ -227,7 +236,7 @@ export default function SearchPage() {
                         <Star size={10} fill="#FF8A00" className="text-[#FF8A00]" /> {wine.averageRating?.toFixed(1) || '0.0'}
                       </div>
                       <span className="text-[11px] font-black text-text-main leading-none mt-0.5">
-                        {wine.price ? `₩${wine.price.toLocaleString()}` : '데이터 없음'}
+                        {wine.price ? `₩${wine.price.toLocaleString()}` : '-'}
                       </span>
                    </div>
                 </div>
@@ -235,7 +244,7 @@ export default function SearchPage() {
             ))
           ) : !isLoading ? (
             <div className="col-span-2 py-20 text-center">
-              <p className="text-text-main/40 font-bold">검색 결과가 없습니다.</p>
+              <p className="text-text-main/40 font-bold text-sm">검색 결과가 없습니다.</p>
             </div>
           ) : null}
         </div>
@@ -256,7 +265,7 @@ export default function SearchPage() {
         {/* 초기 로딩 시 메시지 */}
         {isLoading && wines.length === 0 && (
           <div className="py-20 text-center">
-            <p className="text-text-main/40 font-bold animate-pulse">와인 데이터를 불러오는 중입니다...</p>
+            <p className="text-text-main/40 font-bold text-sm animate-pulse">와인 데이터를 불러오는 중입니다...</p>
           </div>
         )}
       </main>
@@ -265,7 +274,8 @@ export default function SearchPage() {
       {isFilterOpen && (
         <div className="fixed inset-0 z-[100] bg-black/40 flex flex-col justify-end animate-in fade-in duration-300">
            <div className="absolute inset-0" onClick={() => setIsFilterOpen(false)} />
-           <div className="relative bg-white rounded-t-[40px] p-8 space-y-8 animate-in slide-in-from-bottom-full duration-300 max-h-[90vh] overflow-y-auto no-scrollbar">
+           {/* ⭐️ [수정] 바텀 시트 스타일 원복 */}
+           <div className="relative bg-white rounded-t-[40px] p-8 space-y-8 animate-in slide-in-from-bottom-full duration-300 max-h-[90vh] overflow-y-auto no-scrollbar pb-[env(safe-area-inset-bottom,2rem)]">
               <div className="flex items-center justify-between">
                  <h2 className="text-xl font-black text-text-main">필터</h2>
                  <button onClick={() => setIsFilterOpen(false)} className="text-text-main/30 cursor-pointer p-1">
@@ -297,12 +307,13 @@ export default function SearchPage() {
               <div className="space-y-3">
                  <span className="text-sm font-black text-text-main">Price Range</span>
                  <div className="flex items-center gap-3">
+                    {/* ⭐️ [수정] 가격 입력창 스타일 원복 */}
                     <div className="flex-1 bg-white border-2 border-primary-100 rounded-2xl p-2 flex items-center justify-center focus-within:border-[#B36262] transition-colors shadow-inner-sm">
-                      <input type="number" value={priceRange.min} onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })} placeholder="5" className="w-full text-center font-black text-text-main outline-none placeholder:text-text-main/20 bg-transparent" />
+                      <input type="number" value={priceRange.min} onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })} placeholder="최소" className="w-full text-center font-black text-text-main outline-none placeholder:text-text-main/20 bg-transparent" />
                     </div>
                     <span className="text-text-main/30 font-bold">~</span>
                     <div className="flex-1 bg-white border-2 border-primary-100 rounded-2xl p-2 flex items-center justify-center focus-within:border-[#B36262] transition-colors shadow-inner-sm">
-                      <input type="number" value={priceRange.max} onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })} placeholder="15" className="w-full text-center font-black text-text-main outline-none placeholder:text-text-main/20 bg-transparent" />
+                      <input type="number" value={priceRange.max} onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })} placeholder="최대" className="w-full text-center font-black text-text-main outline-none placeholder:text-text-main/20 bg-transparent" />
                     </div>
                     <span className="text-sm font-bold text-text-main/40">만원</span>
                  </div>
@@ -319,7 +330,7 @@ export default function SearchPage() {
                          </button>
                        ))}
                     </div>
-                    <span className="text-lg font-black text-[#B36262] mt-1.5 w-8">{selectedRating}+</span>
+                    <span className="text-lg font-black text-[#B36262] mt-1.5 w-8">{selectedRating > 0 ? `${selectedRating}+` : ''}</span>
                  </div>
               </div>
 
