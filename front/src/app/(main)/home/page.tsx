@@ -56,7 +56,7 @@ export default function HomePage() {
           {generalWines.length > 0 ? (
             generalWines.map((wine) => (
               <Link key={wine.wineId} href={`/wines/${wine.wineId}`} className="shrink-0">
-                <article className="border-primary-100 relative min-w-[232px] overflow-hidden rounded-[22px] border bg-white shadow-[0_12px_26px_rgba(51,34,17,0.06)] transition-all active:scale-[0.985]">
+                <article className="border-primary-100 relative w-[232px] overflow-hidden rounded-[22px] border bg-white shadow-[0_12px_26px_rgba(51,34,17,0.06)] transition-all active:scale-[0.985]">
                   <div className="absolute top-4 left-4 z-10 rounded-full bg-[#B36262] px-3.5 py-1.5 text-[11px] font-black text-white shadow-sm">
                     {wine.matchRate}% MATCH
                   </div>
@@ -65,8 +65,8 @@ export default function HomePage() {
                     <span className="text-6xl">🍷</span>
                   </div>
 
-                  <div className="space-y-3 p-5">
-                    <div className="space-y-2">
+                  <div className="min-w-0 space-y-3 p-5">
+                    <div className="min-w-0 space-y-2">
                       <p className="text-[11px] font-black tracking-[0.18em] text-[#B36262] uppercase">
                         AI RECOMMENDATION
                       </p>
