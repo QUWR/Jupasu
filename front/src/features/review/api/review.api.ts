@@ -16,8 +16,13 @@ export const reviewApi = {
   getWineReviews: (wineId: string | number) =>
     api.get<PaginatedResponse<Review>>(API_PATH.REVIEW.LIST(wineId)).then((res) => res.data),
 
-  create: (data: CreateReviewRequest) =>
-    api.post(API_PATH.REVIEW.CREATE(data.wineId), data).then((res) => res.data),
+  create: (data: CreateReviewRequest) => {
+    const payload = {
+      rating: Number(data.rating),
+      content: data.content.trim() === '' ? ' ' : data.content,
+    };
+    return api.post(API_PATH.REVIEW.CREATE(data.wineId), payload).then((res) => res.data);
+  },
 
   update: ({ wineId, reviewId, rating, content }: UpdateReviewRequest) =>
     api
