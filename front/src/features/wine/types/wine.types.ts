@@ -67,8 +67,14 @@ export type DrinkingSituation = 'GIFT' | 'ALONE' | 'HOUSEWARMING' | 'PARTY' | 'D
 export interface WineRecommendationItem {
   wineId: number;
   nameKr: string;
+  imageUrl?: string;
   matchRate: number;
   recommendationReason: string;
+  sweetness?: number;
+  acidity?: number;
+  body?: number;
+  tannin?: number;
+  style?: string;
 }
 
 export interface SituationResult {
