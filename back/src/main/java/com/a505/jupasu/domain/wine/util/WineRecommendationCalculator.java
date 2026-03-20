@@ -363,7 +363,11 @@ public class WineRecommendationCalculator {
             if (validBody   && !Float.isNaN(cal.uHatBody()))   sum += gaussian(cal.uHatBody(),   wBody,   sigmaT);
             if (validTannin && !Float.isNaN(cal.uHatTannin())) sum += gaussian(cal.uHatTannin(), wTannin, sigmaT);
             if (validAlc)                                       sum += gaussian(uAlc,             wAlc,    SIGMA_A);
-            sPref = sum / nValid;
+            
+            // 데이터 충실도 페널티 (정보가 많을수록 신뢰도 상승)
+            // nValid가 5(전체)일 때는 페널티 없음, 1개일 때는 0.6배로 감점
+            float completenessFactor = 0.6f + 0.4f * (nValid / 5.0f);
+            sPref = (sum / nValid) * completenessFactor;
         }
 
         // ── ⑤ S_sit: 상황 적합도 점수 ───────────────────────────────────────────
@@ -385,9 +389,9 @@ public class WineRecommendationCalculator {
             sPrice = gaussian(wine.getPriceAndRating().getPrice(), tPrice, SIGMA_DIR);
         }
 
-        // ── ⑦ N_valid = 0 극단값 처리 ───────────────────────────────────────────
-        if (nValid == 0 && !validPrice) return Integer.MIN_VALUE;
-        if (nValid == 0) return Math.round(sPrice * 100);
+        // ── ⑦ 데이터 부재 와인 제외 ───────────────────────────────────────────
+        // 맛/도수 정보(isReal)가 하나도 없는 와인은 가격과 상관없이 추천에서 제외
+        if (nValid == 0) return Integer.MIN_VALUE;
 
         // ── ⑧ 상황별 가중치 적용 ────────────────────────────────────────────────
         float wPref, wPriceW, wSitW;
