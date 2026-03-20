@@ -5,6 +5,7 @@ export interface FriendListItem {
   friendId: number;
   nickname: string;
   character: string;
+  reviewCount: number;
   friendSince: string;
 }
 
@@ -13,6 +14,7 @@ export interface FriendPendingItem {
   requesterId: number;
   nickname: string;
   character: string;
+  reviewCount: number;
   createdAt: string;
 }
 

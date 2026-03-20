@@ -11,7 +11,7 @@ import { api } from '@/lib/axios';
 const WINE_TYPES = ['RED', 'WHITE', 'SPARKLING', 'ROSE', 'DESSERT', 'FORTIFIED'];
 
 const SORT_OPTIONS = [
-  { key: 'RECOMMEND', label: '추천순' }, 
+  { key: 'RECOMMEND', label: '추천순' },
   { key: 'price,asc', label: '가격 낮은순' },
   { key: 'price,desc', label: '가격 높은순' },
   { key: 'rating,desc', label: '평점 높은순' },
@@ -67,21 +67,21 @@ export default function SearchPage() {
         page: currentPage,
         size: 10,
       };
-      
+
       if (sortOption !== 'RECOMMEND') {
         params.sort = sortOption;
       }
-      
+
       if (searchQuery) params.keyword = searchQuery;
       if (selectedType) params.type = selectedType;
-      
+
       if (priceRange.min !== '') params.minPrice = Number(priceRange.min) * 10000;
       if (priceRange.max !== '') params.maxPrice = Number(priceRange.max) * 10000;
-      
+
       if (selectedRating > 0) params.minRate = selectedRating;
 
       const response = await api.get('/wines', { params });
-      
+
       const responseData = response.data?.data;
       const content = responseData?.content || [];
       const isLast = responseData?.last ?? true;
@@ -91,7 +91,7 @@ export default function SearchPage() {
       } else {
         setWines(content);
       }
-      
+
       setHasMore(!isLast);
       setPage(currentPage + 1);
     } catch (error) {
@@ -104,7 +104,7 @@ export default function SearchPage() {
   useEffect(() => {
     fetchWines(0, false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortOption]); 
+  }, [sortOption]);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -141,7 +141,7 @@ export default function SearchPage() {
               onKeyDown={handleSearchKeyDown}
             />
           </div>
-          <button 
+          <button
             onClick={() => setIsFilterOpen(true)}
             // ⭐️ [수정] 버튼 스타일 원복
             className="w-[52px] h-[52px] shrink-0 bg-white border-2 border-primary-100 rounded-full flex items-center justify-center text-text-main/40 shadow-sm cursor-pointer active:scale-95 transition-transform"
@@ -200,8 +200,8 @@ export default function SearchPage() {
         <div className="grid grid-cols-2 gap-3 items-start content-start">
           {wines.length > 0 ? (
             wines.map((wine) => (
-              <Link 
-                key={wine.id} 
+              <Link
+                key={wine.id}
                 href={ROUTE_PATH.WINE_DETAIL(wine.id)}
                 prefetch={false}
                 // ⭐️ [수정] 카드 스타일 원복
@@ -252,7 +252,7 @@ export default function SearchPage() {
         {/* 더 보기(Load More) 버튼 */}
         {hasMore && wines.length > 0 && (
           <div className="py-8 flex justify-center relative z-10">
-            <button 
+            <button
               onClick={() => fetchWines(page, true)}
               disabled={isLoading}
               className="bg-white border-2 border-primary-100 text-text-main font-black text-sm py-3 px-8 rounded-full shadow-sm active:scale-95 transition-all disabled:opacity-50 disabled:active:scale-100 cursor-pointer"
@@ -283,25 +283,25 @@ export default function SearchPage() {
                  </button>
               </div>
 
-              {/* Wine Types */}
-              <div className="space-y-3">
-                 <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-black text-text-main">Wine types</span>
-                 </div>
-                 <div className="flex flex-wrap gap-2">
-                    {WINE_TYPES.map((type) => (
-                      <Chip 
-                        key={type} 
-                        active={selectedType === type} 
-                        variant={selectedType === type ? 'primary' : 'secondary'} 
-                        onClick={() => toggleType(type)} 
-                        className="px-5 text-xs font-bold border-none cursor-pointer"
-                      >
-                        {type}
-                      </Chip>
-                    ))}
-                 </div>
+            {/* Wine Types */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-black text-text-main">Wine types</span>
               </div>
+              <div className="flex flex-wrap gap-2">
+                {WINE_TYPES.map((type) => (
+                  <Chip
+                    key={type}
+                    active={selectedType === type}
+                    variant={selectedType === type ? 'primary' : 'secondary'}
+                    onClick={() => toggleType(type)}
+                    className="px-5 text-xs font-bold border-none cursor-pointer"
+                  >
+                    {type}
+                  </Chip>
+                ))}
+              </div>
+            </div>
 
               {/* Price Range */}
               <div className="space-y-3">
@@ -318,6 +318,7 @@ export default function SearchPage() {
                     <span className="text-sm font-bold text-text-main/40">만원</span>
                  </div>
               </div>
+            </div>
 
               {/* Average Rating */}
               <div className="space-y-3">
@@ -333,30 +334,31 @@ export default function SearchPage() {
                     <span className="text-lg font-black text-[#B36262] mt-1.5 w-8">{selectedRating > 0 ? `${selectedRating}+` : ''}</span>
                  </div>
               </div>
+            </div>
 
-              {/* Reset & Apply Buttons */}
-              <div className="pt-6 flex gap-3 border-t border-primary-100 bg-white sticky bottom-0 z-10">
-                 <button 
-                  onClick={() => {
-                    setSelectedType('');
-                    setSelectedRating(0);
-                    setPriceRange({ min: '', max: '' });
-                  }}
-                  className="flex-1 bg-white border border-primary-100 py-4 rounded-2xl text-sm font-black text-text-main/40 active:scale-95 transition-transform cursor-pointer"
-                 >
-                    초기화
-                 </button>
-                 <button 
-                  onClick={() => {
-                    setIsFilterOpen(false);
-                    fetchWines(0, false); 
-                  }}
-                  className="flex-[2] bg-[#B36262] text-white py-4 rounded-2xl text-sm font-black shadow-lg shadow-[#B36262]/20 active:scale-95 transition-transform cursor-pointer"
-                 >
-                    필터 적용하기
-                 </button>
-              </div>
-           </div>
+            {/* Reset & Apply Buttons */}
+            <div className="pt-6 flex gap-3 border-t border-primary-100 bg-white sticky bottom-0 z-10">
+              <button
+                onClick={() => {
+                  setSelectedType('');
+                  setSelectedRating(0);
+                  setPriceRange({ min: '', max: '' });
+                }}
+                className="flex-1 bg-white border border-primary-100 py-4 rounded-2xl text-sm font-black text-text-main/40 active:scale-95 transition-transform cursor-pointer"
+              >
+                초기화
+              </button>
+              <button
+                onClick={() => {
+                  setIsFilterOpen(false);
+                  fetchWines(0, false);
+                }}
+                className="flex-[2] bg-[#B36262] text-white py-4 rounded-2xl text-sm font-black shadow-lg shadow-[#B36262]/20 active:scale-95 transition-transform cursor-pointer"
+              >
+                필터 적용하기
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

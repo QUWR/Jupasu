@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Star, X } from 'lucide-react';
 import Button from '@/components/ui/button/Button';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -11,7 +12,7 @@ interface ReviewModalProps {
   onSubmit: (data: { rating: number; content: string }) => void;
   onDelete?: () => void;
   initialData?: { rating: number; content: string };
-  wineInfo: { name: string; category: string; image?: string };
+  wineInfo: { id?: number; name: string; category: string; image?: string };
 }
 
 export default function ReviewModal({
@@ -55,7 +56,13 @@ export default function ReviewModal({
               </div>
 
               <div className="min-w-0 flex-1">
-                <h3 className="text-text-main truncate text-sm font-black">{wineInfo.name}</h3>
+                <Link
+                  href={`/wines/${wineInfo.id}`}
+                  onClick={onClose} // 이동 시 모달을 닫아줍니다.
+                  className="text-text-main cursor-pointer truncate text-sm font-black hover:underline"
+                >
+                  {wineInfo.name}
+                </Link>
                 <p className="text-text-main/35 mt-0.5 text-xs font-medium">{wineInfo.category}</p>
               </div>
 

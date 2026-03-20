@@ -14,7 +14,9 @@ export const reviewApi = {
     api.get<ApiResponse<MyPageReview[]>>(API_PATH.USER.REVIEWS).then((res) => res.data.data),
 
   getWineReviews: (wineId: string | number) =>
-    api.get<PaginatedResponse<Review>>(API_PATH.REVIEW.LIST(wineId)).then((res) => res.data),
+    api
+      .get<PaginatedResponse<Review>>(API_PATH.REVIEW.LIST(wineId))
+      .then((res) => res.data.content ?? []),
 
   create: (data: CreateReviewRequest) => {
     const payload = {

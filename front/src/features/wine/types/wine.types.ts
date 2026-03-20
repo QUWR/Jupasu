@@ -11,6 +11,36 @@ export interface Wine {
   imageUrl: string;
 }
 
+export interface WineDetail {
+  wineId: number;
+  nameKr: string;
+  nameEn: string;
+  imageUrl: string;
+  country: string;
+  region: string;
+  winery: string;
+  grapeVariety: string;
+  alcoholDegree: number;
+  averageRating: number;
+  price: number;
+  description: string;
+  sweetness: number;
+  acidity: number;
+  body: number;
+  tannin: number;
+  matchRate: number;
+  pairingFoods: string[];
+}
+
+export interface WineReview {
+  reviewId: number;
+  userId: number;
+  nickname: string;
+  rating: number;
+  content: string;
+  createdAt: string;
+}
+
 export interface WineListParams {
   keyword?: string;
   page?: number;

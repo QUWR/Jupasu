@@ -4,99 +4,172 @@ import { useState } from 'react';
 import { X, Search } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-
-const FRIENDS = [
-  { id: 1, name: '와인러버민지', avatar: 'cat1.svg', count: 28, isFriend: true },
-  { id: 2, name: '와인러버민지', avatar: 'tiger1.svg', count: 28, isFriend: false },
-  { id: 3, name: '민지야술그만마셔라', avatar: 'whale1.svg', count: 28, isFriend: false },
-];
+import Modal from '@/components/ui/modal/Modal';
+import { useSearchUsersQuery } from '@/features/user/hooks/useUserQueries';
+import {
+  useInviteFriendMutation,
+  useFriendListQuery,
+} from '@/features/friend/hooks/useFriendQueries';
+import { cn } from '@/lib/utils';
 
 export default function FriendsPage() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const { data: searchResults = [], isFetching } = useSearchUsersQuery(searchQuery);
+  const { data: friendsList = [] } = useFriendListQuery();
+  const inviteFriendMutation = useInviteFriendMutation();
+
+  const handleInvite = async (userId: number, nickname: string) => {
+    await inviteFriendMutation.mutateAsync({ receiverId: userId, receiverNickname: nickname });
+  };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col pb-24">
+    <div className="bg-background flex min-h-screen flex-col pb-24">
       <header className="flex items-center justify-between px-6 py-6">
-        <Link href="/mypage" className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-primary-100">
-          <X size={24} className="text-text-main rotate-45" /> {/* Using X as back arrow placeholder */}
+        <Link
+          href="/mypage"
+          className="border-primary-100 flex h-10 w-10 items-center justify-center rounded-full border bg-white shadow-sm"
+        >
+          <X size={24} className="text-text-main rotate-45" />{' '}
+          {/* Using X as back arrow placeholder */}
         </Link>
-        <h1 className="text-xl font-black text-text-main">친구 목록</h1>
-        <button 
+        <h1 className="text-text-main text-xl font-black">친구 목록</h1>
+        <button
           onClick={() => setIsSearchOpen(true)}
-          className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-primary-100"
+          className="border-primary-100 flex h-10 w-10 items-center justify-center rounded-full border bg-white shadow-sm"
         >
           <Search size={20} className="text-[#B36262]" />
         </button>
       </header>
 
-      <main className="px-6 space-y-6">
-         {FRIENDS.map((friend) => (
-           <div key={friend.id} className="bg-white rounded-[32px] p-5 flex items-center justify-between border border-primary-100 shadow-sm">
-              <div className="flex items-center gap-4">
-                 <div className="relative w-14 h-14 rounded-full overflow-hidden bg-primary-100 border-2 border-primary-100">
-                    <Image src={`/${friend.avatar}`} alt={friend.name} fill className="object-cover" />
-                 </div>
-                 <div className="flex flex-col">
-                    <span className="font-black text-text-main leading-tight">{friend.name}</span>
-                    <span className="text-xs font-bold text-text-main/30">{friend.count}종 시음</span>
-                 </div>
+      <main className="space-y-6 px-6">
+        {friendsList.map((friend) => (
+          <div
+            key={friend.friendId}
+            className="border-primary-100 flex items-center justify-between rounded-[32px] border bg-white p-5 shadow-sm"
+          >
+            <div className="flex items-center gap-4">
+              <div className="bg-primary-100 border-primary-100 relative h-14 w-14 overflow-hidden rounded-full border-2">
+                <Image
+                  src={
+                    friend.character
+                      ? friend.character.startsWith('/')
+                        ? friend.character
+                        : `/${friend.character}1.png`
+                      : '/tiger1.png'
+                  }
+                  alt={friend.nickname}
+                  fill
+                  className="object-cover"
+                />
               </div>
-              <button className={`px-5 py-2.5 rounded-2xl text-xs font-black transition-all ${
-                friend.isFriend 
-                  ? "bg-gray-500 text-white" 
-                  : "bg-[#FFF5F5] text-[#B36262] border border-[#B36262]/20"
-              }`}>
-                {friend.isFriend ? '친구' : '친구 요청'}
-              </button>
-           </div>
-         ))}
+              <div className="flex flex-col">
+                <span className="text-text-main leading-tight font-black">{friend.nickname}</span>
+                <span className="text-text-main/30 text-xs font-bold">
+                  {friend.reviewCount ?? 0}종 시음
+                </span>
+              </div>
+            </div>
+            <button className="rounded-2xl bg-gray-500 px-5 py-2.5 text-xs font-black text-white transition-all">
+              친구
+            </button>
+          </div>
+        ))}
       </main>
 
       {/* Friend Search Modal Overlay */}
-      {isSearchOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/40 flex flex-col justify-end animate-in fade-in duration-300">
-           <div className="absolute inset-0" onClick={() => setIsSearchOpen(false)} />
-           <div className="relative bg-white rounded-t-[40px] p-8 space-y-8 animate-in slide-in-from-bottom-full duration-300 min-h-[70vh]">
-              <div className="flex items-center justify-between">
-                 <h2 className="text-2xl font-black text-text-main">친구 검색</h2>
-                 <button onClick={() => setIsSearchOpen(false)} className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                    <X size={24} className="text-text-main" />
-                 </button>
-              </div>
+      <Modal
+        isOpen={isSearchOpen}
+        onClose={() => {
+          setIsSearchOpen(false);
+          setSearchQuery('');
+        }}
+        title="친구 검색"
+        hideDefaultFooter
+        className="w-[calc(100vw-1rem)] max-w-[20.5rem] rounded-[1.7rem] bg-[#F7F5F1] px-3.5 py-4 sm:max-w-[21.5rem] sm:px-4"
+      >
+        <div className="bg-primary-100/80 mb-4 h-px" />
+        <div className="space-y-3.5">
+          <div className="relative">
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="focus:border-primary-500 placeholder:text-text-main/35 text-text-main h-11 w-full rounded-full border border-[#DDD4C8] bg-[#FBFAF7] py-3 pr-12 pl-4 text-[13px] font-medium focus:outline-none"
+              placeholder="친구 닉네임 입력..."
+            />
+            <button className="absolute top-1/2 right-2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#B17672] text-white">
+              <Search size={16} />
+            </button>
+          </div>
 
-              <div className="relative">
-                 <input 
-                   className="w-full bg-white border-2 border-primary-100 rounded-3xl py-4 pl-6 pr-14 text-sm font-bold focus:outline-none focus:border-primary-500"
-                   placeholder="친구 ID 입력..."
-                 />
-                 <button className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#B36262] rounded-full flex items-center justify-center text-white">
-                    <Search size={20} />
-                 </button>
-              </div>
-
-              <div className="space-y-4">
-                 {FRIENDS.map((f) => (
-                    <div key={f.id} className="bg-white rounded-[32px] p-5 flex items-center justify-between border border-primary-100 shadow-sm">
-                       <div className="flex items-center gap-4">
-                          <div className="relative w-14 h-14 rounded-full overflow-hidden bg-primary-100 border-2 border-primary-100">
-                             <Image src={`/${f.avatar}`} alt={f.name} fill className="object-cover" />
-                          </div>
-                          <div className="flex flex-col">
-                             <span className="font-black text-text-main leading-tight">{f.name}</span>
-                             <span className="text-xs font-bold text-text-main/30">{f.count}종 시음</span>
-                          </div>
-                       </div>
-                       <button className={`px-5 py-2.5 rounded-2xl text-xs font-black ${
-                         f.isFriend ? "bg-gray-500 text-white" : "bg-[#FFF5F5] text-[#B36262]"
-                       }`}>
-                          {f.isFriend ? '친구' : '친구 요청'}
-                       </button>
+          <div className="max-h-[50vh] space-y-2.5 overflow-y-auto pr-1">
+            {searchResults.length > 0 ? (
+              searchResults.map((f) => (
+                <div
+                  key={f.userId}
+                  className="flex items-center justify-between rounded-[1.2rem] border border-[#DDD4C8] bg-[#FBFAF7] p-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="relative h-10 w-10 overflow-hidden rounded-full bg-[#8E5A45]">
+                      <Image
+                        src={
+                          f.character
+                            ? f.character.startsWith('/')
+                              ? f.character
+                              : `/${f.character}1.png`
+                            : '/tiger1.png'
+                        }
+                        alt={f.nickname}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
-                 ))}
+                    <div className="flex flex-col">
+                      <span className="text-text-main text-[13px] font-black">{f.nickname}</span>
+                      <span className="text-text-main/45 text-[11px] font-medium">
+                        {f.reviewCount ?? 0}종 시음
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (f.friendStatus === 'NONE') handleInvite(f.userId, f.nickname);
+                    }}
+                    className={cn(
+                      'rounded-full px-3.5 py-1.5 text-[10px] font-black transition-colors',
+                      f.friendStatus === 'ACCEPTED'
+                        ? 'bg-[#8B8B8B] text-white'
+                        : f.friendStatus === 'PENDING'
+                          ? 'text-text-main/55 bg-[#F3EFE8]'
+                          : 'bg-[#F6EAEA] text-[#B17672]',
+                    )}
+                    disabled={f.friendStatus !== 'NONE' || inviteFriendMutation.isPending}
+                  >
+                    {f.friendStatus === 'ACCEPTED'
+                      ? '친구'
+                      : f.friendStatus === 'PENDING'
+                        ? '요청 중'
+                        : '친구 요청'}
+                  </button>
+                </div>
+              ))
+            ) : isFetching ? (
+              <div className="text-text-main/50 py-8 text-center text-[13px] font-medium">
+                검색 중...
               </div>
-           </div>
+            ) : searchQuery.trim().length >= 2 ? (
+              <div className="text-text-main/50 py-8 text-center text-[13px] font-medium">
+                검색 결과가 없습니다.
+              </div>
+            ) : (
+              <div className="text-text-main/50 py-8 text-center text-[13px] font-medium">
+                닉네임을 2글자 이상 검색해 보세요.
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

@@ -9,6 +9,15 @@ const withPWA = withPWAInit({
 // NextConfig 타입을 명시하여 ESLint 에러 해결
 const nextConfig: NextConfig = {
   turbopack: {}, // Turbopack 빌드 충돌 방지용 빈 객체
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 export default withPWA(nextConfig);

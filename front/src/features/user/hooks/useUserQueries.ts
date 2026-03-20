@@ -40,6 +40,14 @@ export function useUpdatePreferenceMutation() {
   });
 }
 
+export function useSearchUsersQuery(nickname: string) {
+  return useQuery({
+    queryKey: ['users', 'search', nickname],
+    queryFn: () => userApi.searchUsers(nickname),
+    enabled: nickname.trim().length >= 2,
+  });
+}
+
 export function usePreferenceQuery() {
   return useQuery({
     queryKey: [QUERY_KEY.USER.ME, 'preferences'],

@@ -28,6 +28,7 @@ export const API_PATH = {
     REVIEWS: '/users/reviews',
     WITHDRAW: '/users/withdraw',
     PREFERENCES: '/preferences',
+    SEARCH: '/users/search',
   },
   FRIEND: {
     LIST: '/friends',

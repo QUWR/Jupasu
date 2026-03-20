@@ -45,3 +45,11 @@ export interface UserProfileResponse {
 }
 
 export type AuthStatus = 'idle' | 'loading' | 'authenticated' | 'unauthenticated';
+
+export interface UserSearchResponse {
+  userId: number;
+  nickname: string;
+  character: string | null;
+  reviewCount: number;
+  friendStatus: 'NONE' | 'PENDING' | 'ACCEPTED' | 'REJECTED';
+}
