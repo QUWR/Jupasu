@@ -122,10 +122,12 @@ export default function HomePage() {
                     </div>
 
                     <div className="border-primary-100/50 space-y-1 border-t pt-1">
-                      <TasteGauge label="SWEET" value={wine.sweetness} />
-                      <TasteGauge label="ACID" value={wine.acidity} />
-                      <TasteGauge label="BODY" value={wine.body} />
-                      <TasteGauge label="TANNIN" value={wine.tannin} />
+                      {wine.sweetness != null && (
+                        <TasteGauge label="SWEET" value={wine.sweetness} />
+                      )}
+                      {wine.acidity != null && <TasteGauge label="ACID" value={wine.acidity} />}
+                      {wine.body != null && <TasteGauge label="BODY" value={wine.body} />}
+                      {wine.tannin != null && <TasteGauge label="TANNIN" value={wine.tannin} />}
                     </div>
                   </div>
                 </article>

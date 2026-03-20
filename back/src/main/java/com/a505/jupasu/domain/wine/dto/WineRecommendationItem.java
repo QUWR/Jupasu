@@ -44,6 +44,7 @@ public record WineRecommendationItem(
                 .acidity(tp != null && Boolean.TRUE.equals(tp.getIsRealAcidity()) ? tp.getAcidity() : null)
                 .body(tp != null && Boolean.TRUE.equals(tp.getIsRealBody()) ? tp.getBody() : null)
                 .tannin(tp != null && Boolean.TRUE.equals(tp.getIsRealTannin()) ? tp.getTannin() : null)
+                .style(wine.getStyle())
                 .build();
     }
 }
