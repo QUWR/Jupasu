@@ -14,6 +14,7 @@ public class UserSearchResponse {
     private Long userId;
     private String nickname;
     private String character;
+    private Integer reviewCount;
     private FriendStatus friendStatus;
 
     /**
@@ -21,11 +22,12 @@ public class UserSearchResponse {
      * * @param user 변환할 사용자 엔티티
      * @return 변환된 검색 결과 DTO
      */
-    public static UserSearchResponse of(User user, FriendStatus status) {
+    public static UserSearchResponse of(User user, FriendStatus status, Integer reviewCount) {
         return new UserSearchResponse(
                 user.getId(),
                 user.getNickname(),
                 user.getCharacter(),
+                reviewCount,
                 status
         );
     }

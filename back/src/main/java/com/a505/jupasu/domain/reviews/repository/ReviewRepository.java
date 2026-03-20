@@ -32,4 +32,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // 유저가 작성한 리뷰 수 조회
     long countByUser(User user);
+
+    // 여러 유저의 리뷰 수를 한 번에 조회
+    @Query("select r.user.id, count(r) from Review r where r.user.id in :userIds group by r.user.id")
+    List<Object[]> countReviewsByUserIds(@Param("userIds") List<Long> userIds);
 }

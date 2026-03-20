@@ -6,6 +6,7 @@ import com.a505.jupasu.domain.friend.dto.response.FriendPendingResponse;
 import com.a505.jupasu.domain.friend.entity.Friend;
 import com.a505.jupasu.domain.friend.entity.FriendStatus;
 import com.a505.jupasu.domain.friend.repository.FriendRepository;
+import com.a505.jupasu.domain.reviews.repository.ReviewRepository;
 import com.a505.jupasu.domain.user.entity.User;
 import com.a505.jupasu.domain.user.repository.UserRepository;
 import com.a505.jupasu.global.exception.CustomException;
@@ -27,6 +28,7 @@ public class FriendService {
 
     private final FriendRepository friendRepository;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
     /**
      * ID를 통해 상대방을 찾아 친구 요청 전송
@@ -102,8 +104,23 @@ public class FriendService {
                 loginUser, FriendStatus.ACCEPTED, loginUser, FriendStatus.ACCEPTED
         );
 
+        List<Long> friendIds = acceptedFriends.stream()
+                .map(f -> f.getOtherUser(loginUser).getId())
+                .collect(Collectors.toList());
+    
+        java.util.Map<Long, Long> counts = new java.util.HashMap<>();
+        if (!friendIds.isEmpty()) {
+            reviewRepository.countReviewsByUserIds(friendIds).forEach(obj -> {
+                counts.put(((Number) obj[0]).longValue(), ((Number) obj[1]).longValue());
+            });
+        }
+    
         return acceptedFriends.stream()
-                .map(friend -> new FriendListResponse(friend, loginUser))
+                .map(friend -> {
+                    User other = friend.getOtherUser(loginUser);
+                    Integer reviewCount = counts.getOrDefault(other.getId(), 0L).intValue();
+                    return new FriendListResponse(friend, loginUser, reviewCount);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -116,9 +133,23 @@ public class FriendService {
     @Transactional(readOnly = true)
     public List<FriendPendingResponse> getPendingFriendList(User loginUser) {
         List<Friend> pendingRequests = friendRepository.findAllByReceiverAndStatus(loginUser, FriendStatus.PENDING);
-
+    
+        List<Long> requesterIds = pendingRequests.stream()
+                .map(f -> f.getRequester().getId())
+                .collect(Collectors.toList());
+    
+        java.util.Map<Long, Long> counts = new java.util.HashMap<>();
+        if (!requesterIds.isEmpty()) {
+            reviewRepository.countReviewsByUserIds(requesterIds).forEach(obj -> {
+                counts.put(((Number) obj[0]).longValue(), ((Number) obj[1]).longValue());
+            });
+        }
+    
         return pendingRequests.stream()
-                .map(FriendPendingResponse::new)
+                .map(f -> {
+                    Integer count = counts.getOrDefault(f.getRequester().getId(), 0L).intValue();
+                    return new FriendPendingResponse(f, count);
+                })
                 .collect(Collectors.toList());
     }
 

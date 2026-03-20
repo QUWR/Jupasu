@@ -72,11 +72,11 @@ public class TasteReportService {
 
         if (preference != null) {
             totalWeight += PREFERENCE_WEIGHT;
-            sumSweet += PREFERENCE_WEIGHT * (preference.getSweetness() != null ? preference.getSweetness() * 10 : 50);
-            sumAcid += PREFERENCE_WEIGHT * (preference.getAcidity() != null ? preference.getAcidity() * 10 : 50);
-            sumBody += PREFERENCE_WEIGHT * (preference.getBody() != null ? preference.getBody() * 10 : 50);
-            sumTan += PREFERENCE_WEIGHT * (preference.getTannin() != null ? preference.getTannin() * 10 : 50);
-            sumAlc += PREFERENCE_WEIGHT * (preference.getAbv() != null ? preference.getAbv() * 2.0 : 10.0);
+            sumSweet += PREFERENCE_WEIGHT * (preference.getSweetness() != null ? preference.getSweetness() : 2.5);
+            sumAcid += PREFERENCE_WEIGHT * (preference.getAcidity() != null ? preference.getAcidity() : 2.5);
+            sumBody += PREFERENCE_WEIGHT * (preference.getBody() != null ? preference.getBody() : 2.5);
+            sumTan += PREFERENCE_WEIGHT * (preference.getTannin() != null ? preference.getTannin() : 2.5);
+            sumAlc += PREFERENCE_WEIGHT * (preference.getAbv() != null ? preference.getAbv() : 10.0);
         }
 
         for (Review review : reviews) {

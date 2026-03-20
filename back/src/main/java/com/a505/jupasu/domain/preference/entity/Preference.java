@@ -30,16 +30,16 @@ public class Preference {
     @JoinColumn(name = "user_id")
     private User user;
 
-    // 선호 당도 (1~10 척도)
+    // 선호 당도 (1~5 척도)
     private Integer sweetness;
 
-    // 선호 산도/상큼함 (1~10 척도)
+    // 선호 산도/상큼함 (1~5 척도)
     private Integer acidity;
 
-    // 선호 바디감 (1~10 척도)
+    // 선호 바디감 (1~5 척도)
     private Integer body;
 
-    // 선호 탄닌 (1~10 척도)
+    // 선호 탄닌 (1~5 척도)
     private Integer tannin;
 
     // 선호 도수 (실제 도수 %, 예: 13)

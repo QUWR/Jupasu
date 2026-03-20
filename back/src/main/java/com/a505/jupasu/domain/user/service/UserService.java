@@ -160,11 +160,23 @@ public class UserService {
         List<User> searchedUsers = userRepository.findByNicknameContainingAndIdNot(nickname, currentUser.getId());
 
         List<Friend> myRelations = friendRepository.findAllByRequesterOrReceiver(currentUser);
-
+    
+        List<Long> searchedUserIds = searchedUsers.stream()
+                .map(User::getId)
+                .collect(Collectors.toList());
+    
+        java.util.Map<Long, Long> counts = new java.util.HashMap<>();
+        if (!searchedUserIds.isEmpty()) {
+            reviewRepository.countReviewsByUserIds(searchedUserIds).forEach(obj -> {
+                counts.put(((Number) obj[0]).longValue(), ((Number) obj[1]).longValue());
+            });
+        }
+    
         return searchedUsers.stream()
                 .map(user -> {
                     FriendStatus status = determineStatus(user, myRelations);
-                    return UserSearchResponse.of(user, status);
+                    Integer reviewCount = counts.getOrDefault(user.getId(), 0L).intValue();
+                    return UserSearchResponse.of(user, status, reviewCount);
                 })
                 .collect(Collectors.toList());
     }

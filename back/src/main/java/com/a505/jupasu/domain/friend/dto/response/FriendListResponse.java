@@ -17,6 +17,7 @@ public class FriendListResponse {
     private Long friendId;
     private String nickname;
     private String character;
+    private Integer reviewCount;
     private LocalDateTime friendSince;
 
     /**
@@ -25,13 +26,14 @@ public class FriendListResponse {
      * @param friend 친구 관계 엔티티
      * @param me     현재 로그인한 사용자 엔티티 (상대방 판별용)
      */
-    public FriendListResponse(Friend friend, User me) {
+    public FriendListResponse(Friend friend, User me, Integer reviewCount) {
         User other = friend.getOtherUser(me);
 
         this.requestId = friend.getRequestId();
         this.friendId = friend.getOtherUser(me).getId();
         this.nickname = other.getNickname();
         this.character = other.getCharacter();
+        this.reviewCount = reviewCount;
         this.friendSince = friend.getCreatedAt();
     }
 }
