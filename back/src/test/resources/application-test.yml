@@ -24,5 +24,5 @@ spring:
         default_batch_fetch_size: 100
 
 JWT_SECRET: VGhpc0lzQUR1bW15U2VjcmV0S2V5Rm9yVGVzdGluZ1B1cnBvc2VzMTIzNDU2Nzg5MA==
-MAIL_USERNAME: jupasu476@gmail.com
-MAIL_PASSWORD: xdlssayvecbfctub
+MAIL_USERNAME: ${MAIL_USERNAME:}
+MAIL_PASSWORD: ${MAIL_PASSWORD:}
