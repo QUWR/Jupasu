@@ -117,6 +117,35 @@ class WineApiIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
+    @DisplayName("잘못된 요청(JSON 오류·필수 파라미터 누락·타입 불일치)은 400, 지원하지 않는 메서드는 405")
+    void clientErrors_returns4xxInsteadOf500() throws Exception {
+        // 깨진 JSON
+        MvcResult brokenJson = mockMvc.perform(post("/api/reviews/1/review").header("Authorization", bearer)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"rating\": ")).andReturn();
+        assertThat(brokenJson.getResponse().getStatus()).isEqualTo(400);
+        // 필수 쿼리 파라미터(nickname) 누락
+        MvcResult missingParam = mockMvc.perform(get("/api/users/search").header("Authorization", bearer)).andReturn();
+        assertThat(missingParam.getResponse().getStatus()).isEqualTo(400);
+        // 경로 변수 타입 불일치
+        MvcResult typeMismatch = mockMvc.perform(get("/api/wines/abc").header("Authorization", bearer)).andReturn();
+        assertThat(typeMismatch.getResponse().getStatus()).isEqualTo(400);
+        // 지원하지 않는 메서드
+        MvcResult wrongMethod = mockMvc.perform(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete("/api/wines").header("Authorization", bearer)).andReturn();
+        assertThat(wrongMethod.getResponse().getStatus()).isEqualTo(405);
+    }
+
+    @Test
+    @DisplayName("AI 서버에 연결할 수 없으면 일반 500이 아니라 AI_SERVER_UNAVAILABLE(503)")
+    void aiServerDown_returns503() throws Exception {
+        // 테스트 환경의 AI 서버 주소(http://ai:8000)는 존재하지 않는 호스트
+        MvcResult result = mockMvc.perform(post("/api/ai/refine").header("Authorization", bearer)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"task\": \"review\", \"textContent\": \"맛있어요\"}")).andReturn();
+        assertThat(result.getResponse().getStatus()).isEqualTo(503);
+        assertThat(result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8)).contains("AI_SERVER_UNAVAILABLE");
+    }
+
+    @Test
     @DisplayName("없는 와인에 리뷰를 쓰면 HTTP 404, 같은 와인에 두 번 쓰면 HTTP 409")
     void reviewApi_returnsProperStatusCodes() throws Exception {
         String body = "{\"rating\": 5, \"content\": \"좋아요\"}";
