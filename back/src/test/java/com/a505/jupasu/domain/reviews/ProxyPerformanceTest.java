@@ -6,6 +6,8 @@ import com.a505.jupasu.domain.wine.entity.Wine;
 import com.a505.jupasu.domain.wine.entity.WineType;
 import com.a505.jupasu.domain.wine.repository.WineRepository;
 import jakarta.persistence.EntityManager;
+import org.hibernate.Session;
+import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(properties = {
         "JWT_SECRET=VGhpc0lzQUR1bW15U2VjcmV0S2V5Rm9yVGVzdGluZ1B1cnBvc2VzMTIzNDU2Nzg5MA=="
@@ -63,6 +67,8 @@ public class ProxyPerformanceTest {
         // =========================================================================
         // 1. 기존 방식 (findById): 매번 실제 DB에서 SELECT 쿼리를 날려 엔티티를 가져옵니다.
         // =========================================================================
+        Statistics stats = entityManager.unwrap(Session.class).getSessionFactory().getStatistics();
+        stats.clear();
         stopWatch.start("1. findById (실제 DB I/O 발생)");
         for (int i = 0; i < 1000; i++) {
             User user = userRepository.findById(userId).orElseThrow();
@@ -72,6 +78,8 @@ public class ProxyPerformanceTest {
             entityManager.clear();
         }
         stopWatch.stop();
+        long findByIdStatements = stats.getPrepareStatementCount();
+        stats.clear();
 
         // =========================================================================
         // 2. 최적화 방식 (getReferenceById): DB에 가지 않고 빈 껍데기(프록시)만 만듭니다.
@@ -85,8 +93,13 @@ public class ProxyPerformanceTest {
             entityManager.clear();
         }
         stopWatch.stop();
+        long referenceStatements = stats.getPrepareStatementCount();
 
-        // then: 콘솔에 예쁜 표 형태로 결과를 출력합니다.
+        // then: 시간은 환경마다 달라서 검증하지 않고, 실행된 SELECT 수로 최적화가 유지되는지 검증한다.
+        assertThat(findByIdStatements).as("findById: User·Wine 각 1,000번 SELECT").isEqualTo(2000);
+        assertThat(referenceStatements).as("getReferenceById: SELECT 없이 프록시만 생성").isZero();
+
+        // 시간 비교는 참고용으로 콘솔에 표 형태로 출력합니다.
         System.out.println("=====================================================");
         System.out.println(stopWatch.prettyPrint());
         System.out.println("=====================================================");

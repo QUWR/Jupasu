@@ -60,26 +60,8 @@ public class RatingSummary {
         refresh();
     }
 
-    public void addUserRating(int rating) {
-        changeUserStarCount(rating, 1);
-        this.userReviewCount += 1;
-        this.userRatingSum += rating;
-        refresh();
-    }
-
-    public void updateUserRating(int oldRating, int newRating) {
-        changeUserStarCount(oldRating, -1);
-        changeUserStarCount(newRating, 1);
-        this.userRatingSum = this.userRatingSum - oldRating + newRating;
-        refresh();
-    }
-
-    public void removeUserRating(int rating) {
-        changeUserStarCount(rating, -1);
-        this.userReviewCount -= 1;
-        this.userRatingSum -= rating;
-        refresh();
-    }
+    // 사용자 리뷰 반영(addUserRating 등)은 동시성 문제(Lost Update)로 제거하고
+    // WineRepository.applyUserRatingChange의 원자적 UPDATE로 옮겼다. 아래 refresh()와 같은 공식을 SQL로 계산한다.
 
     public int getDisplayStar5Count() {
         return externalStar5Count + userStar5Count;
@@ -99,17 +81,6 @@ public class RatingSummary {
 
     public int getDisplayStar1Count() {
         return externalStar1Count + userStar1Count;
-    }
-
-    private void changeUserStarCount(int rating, int delta) {
-        switch (rating) {
-            case 1 -> this.userStar1Count += delta;
-            case 2 -> this.userStar2Count += delta;
-            case 3 -> this.userStar3Count += delta;
-            case 4 -> this.userStar4Count += delta;
-            case 5 -> this.userStar5Count += delta;
-            default -> throw new IllegalArgumentException("rating must be between 1 and 5");
-        }
     }
 
     private void refresh() {

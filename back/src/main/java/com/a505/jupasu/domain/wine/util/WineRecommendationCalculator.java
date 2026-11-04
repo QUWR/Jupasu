@@ -139,7 +139,14 @@ public class WineRecommendationCalculator {
      * 상황 없이 취향 기반 추천도 계산 (상세 페이지용 — 데이터 불완전 와인도 점수 산출)
      */
     public int getMatch(User user, Wine wine) {
-        Preference pref = preferenceRepository.findByUserId(user.getId()).orElse(null);
+        return getMatch(user, wine, preferenceRepository.findByUserId(user.getId()).orElse(null));
+    }
+
+    /**
+     * 이미 조회한 취향(Preference)을 받아 적중률을 계산한다.
+     * 와인 상세 조회에서 취향을 한 번만 조회하도록 추가한 오버로드 (계산 로직은 위 메서드와 동일)
+     */
+    public int getMatch(User user, Wine wine, Preference pref) {
         List<Review> reviews = reviewRepository.findAllByUserWithWine(user);
         CalibratedProfile calibrated = calibrate(pref, reviews);
         return sigmoid(scoreForDetail(wine, pref, calibrated));

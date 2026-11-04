@@ -5,6 +5,7 @@ import com.a505.jupasu.domain.friend.entity.FriendStatus;
 import com.a505.jupasu.domain.friend.repository.FriendRepository;
 import com.a505.jupasu.domain.scrap.repository.WineScrapRepository;
 import com.a505.jupasu.domain.reviews.repository.ReviewRepository;
+import com.a505.jupasu.domain.wine.repository.WineRepository;
 
 import com.a505.jupasu.domain.user.dto.request.UserUpdateRequest;
 import com.a505.jupasu.domain.user.dto.request.WithdrawRequest;
@@ -40,6 +41,7 @@ public class UserService {
     private final FriendRepository friendRepository;
     private final ReviewRepository reviewRepository;
     private final WineScrapRepository wineScrapRepository;
+    private final WineRepository wineRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final RedisService redisService;
     private final AuthUtils authUtils;
@@ -209,6 +211,14 @@ public class UserService {
         // 비밀번호 검증
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        // 0. 탈퇴 사용자의 별점을 와인 평점 집계에서 뺀다.
+        //    리뷰만 지우면 리뷰는 없는데 평균·리뷰 수에 별점이 계속 남는다 (리뷰 삭제 API와 같은 원자적 UPDATE 사용)
+        for (Object[] wineIdAndRating : reviewRepository.findWineIdAndRatingByUserId(user.getId())) {
+            Long wineId = (Long) wineIdAndRating[0];
+            int rating = (Integer) wineIdAndRating[1];
+            wineRepository.applyUserRatingChange(wineId, -1, -rating, 0, rating);
         }
 
         // 1. 연관 데이터 삭제

@@ -30,11 +30,17 @@ public class WineScrapService {
     private final WineRepository wineRepository;
     private final UserRepository userRepository;
 
+    /**
+     * 찜 토글.
+     * userId는 JWT 필터에서 이미 검증된 값이라 프록시로 연결하고, wineId는 경로 값이라 존재 여부만 확인한다.
+     * 동시에 두 번 찜 요청이 들어오면 UNIQUE(user_id, wine_id)에 걸려 409로 응답한다 (중복 저장 방지).
+     */
     public ScrapToggleResponse toggleScrap(Long userId, Long wineId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        Wine wine = wineRepository.findById(wineId)
-                .orElseThrow(() -> new CustomException(ErrorCode.WINE_NOT_FOUND));
+        if (!wineRepository.existsById(wineId)) {
+            throw new CustomException(ErrorCode.WINE_NOT_FOUND);
+        }
+        User user = userRepository.getReferenceById(userId);
+        Wine wine = wineRepository.getReferenceById(wineId);
 
         Optional<WineScrap> existingScrap = wineScrapRepository.findByUserIdAndWineId(userId, wineId);
 

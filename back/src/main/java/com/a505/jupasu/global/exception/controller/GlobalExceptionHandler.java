@@ -10,6 +10,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -83,6 +85,34 @@ public class GlobalExceptionHandler {
                 .message(message)
                 .build();
         return ResponseEntity.status(ErrorCode.INVALID_REQUEST.getStatus()).body(response);
+    }
+
+    /**
+     * 존재하지 않는 경로 요청 처리.
+     * 전용 핸들러가 없으면 Exception 핸들러가 잡아 모든 잘못된 URL이 500으로 응답되던 문제를 막는다.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException e) {
+        ErrorResponse response = ErrorResponse.builder()
+                .code(ErrorCode.PATH_NOT_FOUND)
+                .message(ErrorCode.PATH_NOT_FOUND.getMessage())
+                .build();
+        return ResponseEntity.status(ErrorCode.PATH_NOT_FOUND.getStatus()).body(response);
+    }
+
+    /**
+     * DB 제약 조건 위반(UNIQUE 중복, FK 위반 등) 처리.
+     * 서비스에서 미리 확인하지 못한 경쟁 상황의 마지막 방어선으로, 500 대신 409로 응답한다.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+        log.warn("DataIntegrityViolation : {}", e.getMostSpecificCause().getMessage());
+
+        ErrorResponse response = ErrorResponse.builder()
+                .code(ErrorCode.DATA_INTEGRITY_VIOLATION)
+                .message(ErrorCode.DATA_INTEGRITY_VIOLATION.getMessage())
+                .build();
+        return ResponseEntity.status(ErrorCode.DATA_INTEGRITY_VIOLATION.getStatus()).body(response);
     }
 
     /** Redis 연결 장애 시 처리 (Fault Tolerance) */

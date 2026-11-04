@@ -8,7 +8,9 @@ import lombok.*;
 
 
 @Entity
-@Table(name = "wine_scrap")
+// 같은 와인을 두 번 찜하지 않도록 (user_id, wine_id) UNIQUE (연타·재시도 시 중복 방지)
+@Table(name = "wine_scrap",
+        uniqueConstraints = @UniqueConstraint(name = "uk_wine_scrap_user_wine", columnNames = {"user_id", "wine_id"}))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class WineScrap extends BaseEntity {
