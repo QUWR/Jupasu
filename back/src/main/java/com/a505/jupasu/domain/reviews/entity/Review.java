@@ -6,7 +6,12 @@ import com.a505.jupasu.global.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * 한 사용자는 와인 하나에 리뷰를 하나만 쓸 수 있다.
+ * exists 확인만으로는 동시 요청(확인 후 저장 사이의 경쟁)을 막을 수 없어 DB UNIQUE 제약을 최종 방어선으로 둔다.
+ */
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(name = "uk_review_user_wine", columnNames = {"user_id", "wine_id"}))
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

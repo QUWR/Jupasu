@@ -167,6 +167,12 @@ public class WineRepositoryImpl implements WineRepositoryCustom {
                     break;
             }
         }
+        // 가격·평점처럼 같은 값이 많은 기준만으로 정렬하면 같은 값끼리의 순서가 매번 달라질 수 있어
+        // 페이지를 넘길 때 같은 와인이 두 번 나오거나 빠진다. 유일한 id를 마지막 정렬 기준으로 붙인다.
+        boolean sortedById = pageable.getSort().stream().anyMatch(order -> "id".equals(order.getProperty()));
+        if (!sortedById) {
+            orderSpecifiers.add(new OrderSpecifier<>(Order.DESC, wine.id));
+        }
         return orderSpecifiers.toArray(new OrderSpecifier[0]);
     }
 

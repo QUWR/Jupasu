@@ -10,6 +10,8 @@ import com.a505.jupasu.domain.wine.entity.vo.WinePriceAndRating;
 import com.a505.jupasu.domain.wine.repository.FoodRepository;
 import com.a505.jupasu.domain.wine.repository.WineFoodPairingRepository;
 import com.a505.jupasu.domain.wine.repository.WineRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,9 @@ public class DummyDataInitService {
     private final FoodRepository foodRepository;
     private final WineFoodPairingRepository wineFoodPairingRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @Transactional
     public void generateDummyData() {
         long startTime = System.currentTimeMillis();
@@ -39,11 +44,12 @@ public class DummyDataInitService {
                 "소고기", "돼지고기", "닭고기", "해산물", "파스타",
                 "치즈", "디저트", "샐러드", "피자", "아시안푸드"
         );
+        // food.name은 UNIQUE이므로 이미 있는 음식(실데이터와 겹치는 소고기·파스타 등)은 재사용하고 없는 것만 만든다
         List<Food> foods = new ArrayList<>();
         for (String name : foodNames) {
-            foods.add(Food.builder().name(name).build());
+            foods.add(foodRepository.findByName(name)
+                    .orElseGet(() -> foodRepository.save(Food.builder().name(name).build())));
         }
-        foodRepository.saveAll(foods); // DB에 먼저 저장하여 ID를 발급받음
 
         Random random = new Random();
         WineType[] wineTypes = WineType.values();
@@ -124,7 +130,9 @@ public class DummyDataInitService {
                 wineFoodPairingRepository.saveAll(pairingBatch);
                 log.info("👉 {}건 저장 완료...", i);
 
-                // 메모리 정리를 위해 리스트 비우기
+                // 배치로 DB에 반영한 뒤 영속성 컨텍스트를 비워 엔티티가 쌓이지 않게 한다
+                entityManager.flush();
+                entityManager.clear();
                 wineBatch.clear();
                 pairingBatch.clear();
             }
