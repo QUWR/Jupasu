@@ -26,6 +26,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     // 탈퇴하는 사용자의 모든 리뷰를 삭제
     void deleteByUser(User user);
 
+    /** 탈퇴 시 와인 평점 집계에서 뺄 [와인 ID, 별점] 목록 (엔티티를 읽지 않고 필요한 값만 조회) */
+    @Query("select r.wine.id, r.rating from Review r where r.user.id = :userId")
+    List<Object[]> findWineIdAndRatingByUserId(@Param("userId") Long userId);
+
     // 특정 유저가 작성한 와인 리뷰 조회
     @Query("select r from Review r join fetch r.wine w where r.user = :user order by r.createdAt desc")
     List<Review> findAllByUserWithWine(@Param("user") User user);

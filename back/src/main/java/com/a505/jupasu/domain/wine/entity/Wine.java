@@ -13,6 +13,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import java.time.OffsetDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,8 +21,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 @Entity
 @Getter
@@ -31,8 +30,11 @@ import org.hibernate.type.SqlTypes;
 @AllArgsConstructor
 public class Wine extends BaseEntity {
 
+    // IDENTITY는 INSERT 후에야 ID를 알 수 있어 Hibernate가 JDBC 배치를 끈다.
+    // 데이터 적재 시 대량 INSERT를 묶어 보내기 위해 SEQUENCE(50개씩 미리 할당)를 사용한다.
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "wine_seq_generator")
+    @SequenceGenerator(name = "wine_seq_generator", sequenceName = "wine_seq", allocationSize = 50)
     private Long id;
 
     private String nameKr;
@@ -79,10 +81,12 @@ public class Wine extends BaseEntity {
 
     private OffsetDateTime embeddingGeneratedAt;
 
+    // VectorConverter가 float[]를 "[0.1, 0.2, ...]" 문자열로 바꾸고, DB에서 ?::vector로 변환한다.
+    // @JdbcTypeCode(SqlTypes.OTHER)를 함께 쓰면 값이 bytea로 전달되어 "cannot cast type bytea to vector"로
+    // 모든 와인 INSERT가 실패했으므로 제거했다 (문자열로 전달 → vector로 명시적 변환).
     @org.hibernate.annotations.ColumnTransformer(write = "?::vector")
     @jakarta.persistence.Convert(converter = com.a505.jupasu.domain.wine.util.VectorConverter.class)
     @Column(columnDefinition = "vector(1536)")
-    @JdbcTypeCode(SqlTypes.OTHER)
     private float[] embedding;
 
     public void initializeExternalRatings(
@@ -101,18 +105,6 @@ public class Wine extends BaseEntity {
         this.priceAndRating.updateAverageRating(this.ratingSummary.getDisplayAverageRating());
     }
 
-    public void addUserReviewRating(int rating) {
-        this.ratingSummary.addUserRating(rating);
-        this.priceAndRating.updateAverageRating(this.ratingSummary.getDisplayAverageRating());
-    }
-
-    public void updateUserReviewRating(int oldRating, int newRating) {
-        this.ratingSummary.updateUserRating(oldRating, newRating);
-        this.priceAndRating.updateAverageRating(this.ratingSummary.getDisplayAverageRating());
-    }
-
-    public void removeUserReviewRating(int rating) {
-        this.ratingSummary.removeUserRating(rating);
-        this.priceAndRating.updateAverageRating(this.ratingSummary.getDisplayAverageRating());
-    }
+    // 사용자 리뷰 별점 반영(작성·수정·삭제)은 WineRepository.applyUserRatingChange의 원자적 UPDATE로 처리한다.
+    // 엔티티에서 읽고 계산해 저장하면 동시 리뷰 작성 시 Lost Update가 발생하기 때문이다.
 }

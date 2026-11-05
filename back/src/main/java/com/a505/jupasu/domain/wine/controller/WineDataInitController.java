@@ -17,14 +17,15 @@ public class WineDataInitController {
     private final WineDataInitService wineDataInitService;
 
     @PostMapping("/init-data")
-    public ApiResponse<Void> initWineData() {
+    public ApiResponse<WineDataInitService.ImportResult> initWineData() {
         log.info("수동 데이터 초기화 시작...");
         long startTime = System.currentTimeMillis();
 
-        wineDataInitService.importWineDataFromJson();
+        // 실패하면 서비스가 예외를 던져 전체 롤백되고, 전역 예외 처리기가 오류로 응답한다
+        WineDataInitService.ImportResult result = wineDataInitService.importWineDataFromJson();
 
         long endTime = System.currentTimeMillis();
         log.info("초기화 완료! 소요 시간: {}ms", (endTime - startTime));
-        return ApiResponse.success("와인 데이터 파싱 및 DB 저장 성공", null);
+        return ApiResponse.success("와인 데이터 파싱 및 DB 저장 성공", result);
     }
 }

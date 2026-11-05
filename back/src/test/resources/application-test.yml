@@ -22,6 +22,8 @@ spring:
         format_sql: true
         use_sql_comments: true
         default_batch_fetch_size: 100
+        # 테스트에서 실행된 SQL 수·JDBC 배치 수를 검증하기 위해 통계 수집
+        generate_statistics: true
 
 JWT_SECRET: VGhpc0lzQUR1bW15U2VjcmV0S2V5Rm9yVGVzdGluZ1B1cnBvc2VzMTIzNDU2Nzg5MA==
 MAIL_USERNAME: ${MAIL_USERNAME:}

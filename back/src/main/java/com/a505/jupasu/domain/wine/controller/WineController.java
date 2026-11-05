@@ -36,7 +36,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -71,7 +70,9 @@ public class WineController {
     public ApiResponse<Page<WineSearchResponse>> searchWines(
             @AuthenticationPrincipal LoginUserCustom user,
             @ModelAttribute WineSearchCondition condition,
-            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+            // 기본 정렬을 지정하면 정렬을 고르지 않아도 Sort가 항상 채워져, 키워드 검색의 '유사도순' 분기가 실행되지 않는다.
+            // 정렬 미지정 시 기본 순서는 WineRepositoryImpl이 정한다 (키워드 있음: 유사도순 / 없음: 최신순)
+            @PageableDefault(size = 10) Pageable pageable
     ) {
         Page<WineSearchResponse> response = wineService.searchWines(condition, pageable);
 
@@ -109,8 +110,7 @@ public class WineController {
             @AuthenticationPrincipal LoginUserCustom user,
             @PathVariable("wine_id") Long wineId
     ) {
-        Long userId = user.getUser().getId();
-        WineDetailResponse response = wineService.getWineDetail(userId, wineId);
+        WineDetailResponse response = wineService.getWineDetail(user.getUser(), wineId);
         return ApiResponse.success("와인 상세 정보를 조회했습니다.", response);
     }
 
